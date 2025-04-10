@@ -6,6 +6,7 @@
  
 package org.yourcompany.reccomendersys;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -290,10 +291,10 @@ class Interaction {
     private int userId;
     private int trackId;
     private double rating;
-    private long timestamp;
+    private LocalDateTime timestamp;
     private String interactionType; // play, like, download, etc.
     
-    public Interaction(int userId, int trackId, double rating, long timestamp, String interactionType) {
+    public Interaction(int userId, int trackId, double rating, LocalDateTime timestamp, String interactionType) {
         this.userId = userId;
         this.trackId = trackId;
         this.rating = rating;
@@ -313,7 +314,7 @@ class Interaction {
         return rating;
     }
     
-    public long getTimestamp() {
+    public LocalDateTime getTimestamp() {
         return timestamp;
     }
     
@@ -368,11 +369,17 @@ class CollaborativeFilteringRecommender implements Recommender {
         List<Interaction> interactions1 = dataset.getUserInteractions(userId1);
         List<Interaction> interactions2 = dataset.getUserInteractions(userId2);
         
-        // Convert to maps for easy lookup
+        // Convert to maps for easy lookup, handling duplicate ratings by averaging them
         Map<Integer, Double> ratings1 = interactions1.stream()
-            .collect(Collectors.toMap(Interaction::getTrackId, Interaction::getRating));
+            .collect(Collectors.groupingBy(
+                Interaction::getTrackId,
+                Collectors.averagingDouble(Interaction::getRating)
+            ));
         Map<Integer, Double> ratings2 = interactions2.stream()
-            .collect(Collectors.toMap(Interaction::getTrackId, Interaction::getRating));
+            .collect(Collectors.groupingBy(
+                Interaction::getTrackId,
+                Collectors.averagingDouble(Interaction::getRating)
+            ));
         
         // Find common tracks
         Set<Integer> commonTracks = new HashSet<>(ratings1.keySet());

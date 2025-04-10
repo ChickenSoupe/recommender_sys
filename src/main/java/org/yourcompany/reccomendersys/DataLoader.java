@@ -2,6 +2,8 @@ package org.yourcompany.reccomendersys;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
@@ -38,7 +40,9 @@ public class DataLoader {
                 CSVFormat.DEFAULT.withHeader())) {
             
             for (CSVRecord record : parser) {
-                int id = Integer.parseInt(record.get("track_id"));
+                String trackIdStr = record.get("track_id");
+                // Remove 'T' prefix and parse the number
+                int id = Integer.parseInt(trackIdStr.substring(1));
                 String title = record.get("title");
                 String artist = record.get("artist");
                 String album = record.get("album");
@@ -69,7 +73,9 @@ public class DataLoader {
                 CSVFormat.DEFAULT.withHeader())) {
             
             for (CSVRecord record : parser) {
-                int id = Integer.parseInt(record.get("user_id"));
+                String userIdStr = record.get("user_id");
+                // Remove 'U' prefix and parse the number
+                int id = Integer.parseInt(userIdStr.substring(1));
                 String username = record.get("username");
                 int age = Integer.parseInt(record.get("age"));
                 String gender = record.get("gender");
@@ -99,10 +105,19 @@ public class DataLoader {
                 CSVFormat.DEFAULT.withHeader())) {
             
             for (CSVRecord record : parser) {
-                int userId = Integer.parseInt(record.get("user_id"));
-                int trackId = Integer.parseInt(record.get("track_id"));
+                String userIdStr = record.get("user_id");
+                String trackIdStr = record.get("track_id");
+                
+                // Remove 'U' prefix from user_id
+                int userId = Integer.parseInt(userIdStr.substring(1));
+                
+                // Remove 'T' prefix from track_id
+                int trackId = Integer.parseInt(trackIdStr.substring(1));
+                
                 double rating = Double.parseDouble(record.get("rating"));
-                long timestamp = Long.parseLong(record.get("timestamp"));
+                String timestampStr = record.get("timestamp");
+                LocalDateTime timestamp = LocalDateTime.parse(timestampStr, 
+                    DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
                 String interactionType = record.get("interaction_type");
                 
                 Interaction interaction = new Interaction(userId, trackId, rating, timestamp, interactionType);
